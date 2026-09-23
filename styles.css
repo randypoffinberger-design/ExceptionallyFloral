@@ -188,3 +188,12 @@ footer{background:rgba(8,5,6,.94);backdrop-filter:blur(8px)}
 @media(max-width:430px) and (orientation:portrait){
  body:before{background-position:23% center!important}
 }
+/* Dedicated portrait artwork */
+@media(max-width:700px) and (orientation:portrait){
+ body:before{
+  background-image:url('assets/luxury-background-mobile.PNG')!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+ }
+}
