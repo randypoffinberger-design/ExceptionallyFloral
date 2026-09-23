@@ -152,3 +152,25 @@ footer{background:rgba(8,5,6,.94);backdrop-filter:blur(8px)}
  .ribbon{background:rgba(70,15,32,.48)!important}
  .services,.about,.creations,.contact{box-shadow:0 20px 55px rgba(0,0,0,.18)}
 }
+/* Mobile background composition: preserve the 16:9 artwork instead of stretching it to viewport height */
+@media(max-width:700px){
+ html{background:#090606}
+ body:before{
+  background-size:cover!important;
+  background-position:center center!important;
+  background-attachment:scroll;
+  transform:none;
+ }
+ /* On portrait screens the fixed canvas is widened so the central artwork reads naturally */
+ body:before{
+  width:100vw;height:100vh;
+  background-size:auto 100%!important;
+  background-position:50% 50%!important;
+ }
+}
+@media(max-width:700px) and (orientation:portrait){
+ body:before{
+  background-size:cover!important;
+  background-position:center center!important;
+ }
+}
