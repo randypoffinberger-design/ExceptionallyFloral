@@ -131,3 +131,24 @@ footer{background:rgba(8,5,6,.94);backdrop-filter:blur(8px)}
  .hero h1{font-size:38px}
  .services,.about,.creations,.contact{margin-left:3%;margin-right:3%;padding-left:5%;padding-right:5%}
 }
+/* Open up the fixed artwork: borders + readable shadows, minimal fills */
+.services,.about,.creations,.contact{background:rgba(8,5,6,.26)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;color:#f7eee3}
+.services .section-heading p:last-child,.about-copy p,.gallery-note{color:#e0d4c8}
+.services:before,.about:before{border-color:rgba(211,168,92,.45)}
+.service-grid article{background:rgba(10,6,7,.40)!important;box-shadow:0 10px 30px rgba(0,0,0,.16);border-color:rgba(211,168,92,.5)}
+.service-grid article:hover{background:rgba(10,6,7,.52)!important}
+.service-grid p{color:#e0d2c5}
+.about-copy{border-color:rgba(211,168,92,.65)}
+.about .signature{color:#e1b869}
+.creations{background:rgba(8,5,6,.34)!important}
+.contact{background:rgba(38,8,18,.38)!important}
+.hero-copy{background:rgba(7,4,5,.42)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.ribbon{background:rgba(69,14,31,.50)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:700px){
+ .services,.about,.creations,.contact{background:rgba(8,5,6,.32)!important;color:#f7eee3}
+ .services .section-heading p:last-child,.about-copy p{color:#e4d8cb}
+ .service-grid article{background:rgba(8,5,6,.43)!important}
+ .hero-copy{background:rgba(7,4,5,.40)!important}
+ .ribbon{background:rgba(70,15,32,.48)!important}
+ .services,.about,.creations,.contact{box-shadow:0 20px 55px rgba(0,0,0,.18)}
+}
