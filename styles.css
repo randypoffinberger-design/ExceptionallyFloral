@@ -68,7 +68,7 @@ dialog{padding:50px 16px 14px;border:1px solid #8b6a46;background:#100b0d;color:
  .gallery img{aspect-ratio:4/5}
 }
 /* Fixed luxury artwork background */
-html{background:#090606 url('assets/luxury-background.PNG') center center/cover no-repeat fixed}
+html{background:#090606 url('assets/luxury-background-1.jpg') center center/cover no-repeat fixed}
 body{background:transparent}
 main{background:transparent}
 .header{background:rgba(10,7,7,.90);backdrop-filter:blur(10px)}
@@ -82,7 +82,7 @@ main{background:transparent}
 footer{background:rgba(8,5,6,.94);backdrop-filter:blur(8px)}
 @media(max-width:700px){
  html{background:#090606}
- body:before{content:'';position:fixed;z-index:-2;inset:0;background-image:url('assets/luxury-background.PNG');background-repeat:no-repeat;background-size:auto 100vh;background-position:center top}
+ body:before{content:'';position:fixed;z-index:-2;inset:0;background-image:url('assets/luxury-background-1.jpg');background-repeat:no-repeat;background-size:auto 100vh;background-position:center top}
  body:after{content:'';position:fixed;z-index:-1;inset:0;background:rgba(7,4,5,.18)}
  .hero{padding:70px 6% 65px;min-height:78vh;display:flex;align-items:flex-end}
  .hero-copy{margin:0;padding:27px 24px 29px;background:rgba(8,5,6,.66);border:1px solid rgba(205,164,94,.48);box-shadow:0 18px 55px rgba(0,0,0,.42);backdrop-filter:blur(7px)}
@@ -191,7 +191,7 @@ footer{background:rgba(8,5,6,.94);backdrop-filter:blur(8px)}
 /* Dedicated portrait artwork */
 @media(max-width:700px) and (orientation:portrait){
  body:before{
-  background-image:url('assets/luxury-background-mobile.PNG')!important;
+  background-image:url('assets/luxury-background-mobile-1.jpg')!important;
   background-size:cover!important;
   background-position:center center!important;
   background-repeat:no-repeat!important;
