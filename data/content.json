@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "text": {
+    "intro": "Custom decorative florals for homes, celebrations, special events, and weddings. Designed around your vision and created to make a statement long after the moment has passed.",
+    "creations": "A glimpse of the artistry behind Exceptionally Floral. The Wickedly Enchanted collection shows one dramatic side of a much broader custom style.",
+    "note": "Have a different palette or occasion in mind? Custom requests are welcome. These pieces are examples of past work; availability and details are confirmed when you inquire.",
+    "about": "Exceptionally Floral creates custom decorative arrangements, centerpieces, special-event designs, and wedding pieces using artificial florals and carefully chosen decorative materials.",
+    "contact": "Tell us about the piece you’re imagining. We’ll discuss the design, timing, and pricing with you before you order."
+  },
+  "collections": [
+    {
+      "id": "wickedly-enchanted",
+      "name": "Wickedly Enchanted",
+      "description": "",
+      "hidden": false,
+      "layout": "original",
+      "pieces": [
+        {
+          "id": "piece-enchanted-mischief",
+          "name": "Enchanted Mischief",
+          "alt": "Enchanted Mischief, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Enchanted%20Mischief.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-witching-hour",
+          "name": "Witching Hour",
+          "alt": "Witching Hour, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Witching%20Hour.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-wickedly-enchanted",
+          "name": "Wickedly Enchanted",
+          "alt": "Wickedly Enchanted, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Wickedly%20Enchanted.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-spellbound",
+          "name": "Spellbound",
+          "alt": "Spellbound, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Spellbound.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-haunted-elegance",
+          "name": "Haunted Elegance",
+          "alt": "Haunted Elegance, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Haunted%20Elegance.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-midnight-spell",
+          "name": "Midnight Spell",
+          "alt": "Midnight Spell, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Midnight%20Spell.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-bewitched-garden",
+          "name": "Bewitched Garden",
+          "alt": "Bewitched Garden, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Bewitched%20Garden.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-midnight-bloom",
+          "name": "Midnight Bloom",
+          "alt": "Midnight Bloom, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Midnight%20Bloom.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-moonlit-morning",
+          "name": "Moonlit Morning",
+          "alt": "Moonlit Morning, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Moonlit%20Morning.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-whimsy-after-dark",
+          "name": "Whimsy After Dark",
+          "alt": "Whimsy After Dark, a handcrafted decorative floral piece from the Wickedly Enchanted collection",
+          "image": "assets/Whimsy%20After%20Dark.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        }
+      ]
+    },
+    {
+      "id": "autumn-harvest",
+      "name": "Autumn Harvest",
+      "description": "",
+      "hidden": false,
+      "layout": "original",
+      "pieces": [
+        {
+          "id": "piece-country-grace",
+          "name": "Country Grace",
+          "alt": "Country Grace, a handcrafted decorative floral piece from the Autumn Harvest collection",
+          "image": "assets/Country%20Grace.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-september-song",
+          "name": "September Song",
+          "alt": "September Song, a handcrafted decorative floral piece from the Autumn Harvest collection",
+          "image": "assets/September%20Song.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-meadow-in-bloom",
+          "name": "Meadow in Bloom",
+          "alt": "Meadow in Bloom, a handcrafted decorative floral piece from the Autumn Harvest collection",
+          "image": "assets/Meadow%20in%20Bloom.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-warmth-and-wonder",
+          "name": "Warmth and Wonder",
+          "alt": "Warmth and Wonder, a handcrafted decorative floral piece from the Autumn Harvest collection",
+          "image": "assets/Warmth%20and%20Wonder.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-autumn-in-bloom",
+          "name": "Autumn in Bloom",
+          "alt": "Autumn in Bloom, a handcrafted decorative floral piece from the Autumn Harvest collection",
+          "image": "assets/Autumn%20in%20Bloom.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-autumn-elegance",
+          "name": "Autumn Elegance",
+          "alt": "Autumn Elegance, a handcrafted decorative floral piece from the Autumn Harvest collection",
+          "image": "assets/Autumn%20Elegance.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        },
+        {
+          "id": "piece-sunlit-fields",
+          "name": "Sunlit Fields",
+          "alt": "Sunlit Fields, a handcrafted decorative floral piece from the Autumn Harvest collection",
+          "image": "assets/Sunlit%20Fields.png",
+          "status": "Available",
+          "inventoryType": "one-off"
+        }
+      ]
+    }
+  ]
+}
