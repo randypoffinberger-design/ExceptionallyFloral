@@ -53,6 +53,8 @@ Official references: [Supabase RLS](https://supabase.com/docs/guides/database/po
 
 Automated browser tests use a simulated service. They **do not prove hosted database authorization**. Run `supabase/security-tests.sql` in the staging project's SQL editor after the schema and seed. It rolls its test data back. Also verify through real HTTP/browser sessions:
 
+Local PostgreSQL checks also run through PGlite with simulated Supabase auth/storage scaffolding (`npm install --no-save @electric-sql/pglite`, then `npm run test:database`). They verify SQL execution, roles, RLS, conflicts and snapshot filtering; the hosted service's HTTP/auth configuration still needs the checks below.
+
 - Signed-out and non-allowlisted users cannot read drafts, write content, publish, or upload; public sign-up is disabled.
 - Both approved accounts can sign in, save drafts, upload and preview; concurrent saves/publishes report conflicts.
 - A new draft photo cannot be downloaded anonymously. After publishing its visible piece it loads publicly; hiding and publishing removes anonymous access.

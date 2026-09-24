@@ -2,5 +2,5 @@
   "name": "exceptionally-floral",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test tests/content.test.js", "test:browser": "node tests/browser.cjs" }
+  "scripts": { "test": "node --test tests/content.test.js", "test:browser": "node tests/browser.cjs", "test:database": "node tests/database.cjs" }
 }

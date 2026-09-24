@@ -13,6 +13,7 @@ const server=http.createServer((req,res)=>{let name=decodeURIComponent(req.url.s
   const context=await browser.newContext({viewport:{width,height:1000}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
   await page.goto(base);await page.waitForSelector('.gallery figure');assert.equal(await page.locator('.gallery figure').count(),17);
+  if(process.env.TEST_OUTPUT_DIR && [390,1440].includes(width)){fs.mkdirSync(process.env.TEST_OUTPUT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.TEST_OUTPUT_DIR,`public-${width}.png`)});}
   await page.locator('.gallery-link').first().click();assert.equal(await page.locator('#lightbox').evaluate(el=>el.open),true);await page.keyboard.press('Escape');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Public overflow at ${width}`);
   await page.goto(base+'/admin/');await page.waitForSelector('#notice:not(:empty)');assert.equal(await page.locator('#login button').isDisabled(),true);
@@ -54,7 +55,7 @@ const server=http.createServer((req,res)=>{let name=decodeURIComponent(req.url.s
  await page.getByLabel('Collection name').last().fill('Spring');await page.getByRole('button',{name:'↑ Move collection up'}).last().click();assert.equal(await page.getByLabel('Collection name').nth(1).inputValue(),'Spring');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await page.setViewportSize({width:1440,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
- const out=process.env.TEST_OUTPUT_DIR;if(out){fs.mkdirSync(out,{recursive:true});await page.screenshot({path:path.join(out,'admin-desktop.png'),fullPage:true});await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'admin-phone.png'),fullPage:true});}
+ const out=process.env.TEST_OUTPUT_DIR;if(out){fs.mkdirSync(out,{recursive:true});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(out,'admin-desktop.png')});await page.setViewportSize({width:390,height:844});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(out,'admin-phone.png')});}
  conflict=true;await page.getByRole('button',{name:'Save draft',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Another editor'));
  assert.deepEqual(errors,[]);checks++;await context.close();console.log(`Passed ${checks} browser scenarios: responsive layouts, login, sold/hidden, draft isolation, preview/publish, invalidated preview, upload, safe text, collection ordering and conflicts.`);
  }finally{await browser.close();server.close();}
