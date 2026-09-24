@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validate,publicContent,move} from '../lib/content.js';
+const seed=JSON.parse(readFileSync(new URL('../data/content.json',import.meta.url)));
+test('preserves both original collections and all 17 pieces',()=>{assert.deepEqual(seed.collections.map(c=>[c.name,c.pieces.length]),[['Wickedly Enchanted',10],['Autumn Harvest',7]]);validate(seed);});
+test('hidden records are removed without mutating draft; sold pieces remain',()=>{const d=structuredClone(seed);d.collections[0].hidden=true;d.collections[1].pieces[0].status='Hidden';d.collections[1].pieces[1].status='Sold';const p=publicContent(d);assert.equal(p.collections.length,1);assert.equal(p.collections[0].pieces.length,6);assert.equal(p.collections[0].pieces[0].status,'Sold');assert.equal(d.collections[1].pieces.length,7);});
+test('rejects unsafe images, unknown statuses and duplicate identities',()=>{for(const [key,value] of [['image','javascript:alert(1)'],['image','https://evil.test/a.jpg'],['status','Purchased'],['id',seed.collections[0].id]]){const d=structuredClone(seed);d.collections[0].pieces[0][key]=value;assert.throws(()=>validate(d));}});
+test('reordering preserves identity and respects boundaries',()=>{const a=['a','b','c'];move(a,0,-1);assert.deepEqual(a,['a','b','c']);move(a,0,1);assert.deepEqual(a,['b','a','c']);move(a,2,1);assert.deepEqual(a,['b','a','c']);});
+test('public invariants remain in the page',()=>{const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');for(const value of ['G-MZK1H50LPE','61594848291665','checkout-order-notice','All Sales Are Final','id="lightbox"'])assert.ok(html.includes(value));assert.equal(readFileSync(new URL('../CNAME',import.meta.url),'utf8').trim(),'exceptionallyfloral.com');});

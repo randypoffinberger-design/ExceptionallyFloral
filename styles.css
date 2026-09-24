@@ -213,4 +213,5 @@ footer{background:rgba(8,5,6,.94);backdrop-filter:blur(8px)}
 /* Fine tune desktop artwork upward */
 @media(min-width:701px){
  html{background-position:center 36%!important}
-}
+}/* Structured galleries retain the original layout by default. */
+#collections>section+section{margin-top:48px}.gallery-link{position:relative}.sold-badge{position:absolute;right:12px;bottom:12px;padding:7px 16px;border:1px solid #d7b779;background:rgba(30,12,20,.92);color:#f2d7a5;font:11px Arial,sans-serif;letter-spacing:3px}.collection-description{color:#e0d4c8;font-size:14px}.gallery.layout-even figure,.gallery.layout-large figure{transform:none}.gallery.layout-large{grid-template-columns:repeat(2,minmax(0,1fr))}.preview-banner{position:sticky;top:0;z-index:100;background:#f3d8a1;color:#351421;padding:10px;text-align:center;margin:0;font:14px Arial,sans-serif}@media(max-width:390px){.gallery.layout-large{grid-template-columns:1fr}}
