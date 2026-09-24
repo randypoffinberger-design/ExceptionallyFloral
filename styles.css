@@ -206,3 +206,7 @@ footer{background:rgba(8,5,6,.94);backdrop-filter:blur(8px)}
 @media(min-width:701px){
  html{background-position:center 58%!important}
 }
+/* Correct desktop artwork alignment: shift image upward */
+@media(min-width:701px){
+ html{background-position:center 42%!important}
+}
