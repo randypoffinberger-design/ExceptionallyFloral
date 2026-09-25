@@ -3,7 +3,11 @@ import {validate, statuses, textFields, move} from '../lib/content.js';
 const $ = selector => document.querySelector(selector);
 let draft, revision = 0, dirty = false, previewed = '', busy = false;
 const photos = new Map();
-const notify = message => { $('#notice').textContent = message; };
+const notify = message => {
+  const notice=$('#notice');
+  if($('#editor').hidden)$('#signin').before(notice);else $('.toolbar').append(notice);
+  notice.textContent = message;
+};
 function changed() {dirty=true;previewed='';$('#publish').disabled=true;$('#state').textContent='Unsaved changes';}
 function control(tag, text, action, secondary=true) { const el=document.createElement(tag);el.textContent=text;if(tag==='button'){el.type='button';if(secondary)el.className='secondary';el.onclick=()=>run(action);}return el; }
 function field(label, value, update, type='text', choices=[]) {
@@ -103,5 +107,5 @@ $('#publish').onclick=()=>run(async()=>{
 $('#signout').onclick=()=>run(async()=>{if(dirty&&!confirm('Sign out and discard unsaved changes?'))return;await logout();draft=null;dirty=false;previewed='';revision=0;for(const value of photos.values()){const url=await value.catch(()=>null);if(url?.startsWith('blob:'))URL.revokeObjectURL(url);}photos.clear();$('#editor').hidden=true;$('#signin').hidden=false;$('#collections-editor').replaceChildren();notify('Signed out.');});
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 // Short-lived in-memory sessions: reauthentication never discards an open draft.
-const reauth=control('button','Sign in again',()=>{$('#signin').hidden=false;$('#signin').scrollIntoView();});$('#editor .buttons').append(reauth);
+const reauth=control('button','Sign in again',()=>{$('#signin').hidden=false;$('#signin').scrollIntoView();});$('#editor .session-actions').append(reauth);
 if(!configured){notify('Setup is required before sign-in. Follow ADMIN-SETUP.md to connect your Supabase project.');$('#login button').disabled=true;}
