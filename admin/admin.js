@@ -23,6 +23,29 @@ async function run(action) {
   try{await action();}catch(error){notify(error.message);}finally{busy=false;document.body.removeAttribute('aria-busy');controls.forEach((el,i)=>el.disabled=previous[i]);$('#publish').disabled=!previewed||dirty;}
 }
 function reorder(items,index,delta){move(items,index,delta);changed();render();}
+function confirmCollectionDeletion(collection) {
+  const dialog=document.createElement('dialog');dialog.className='delete-dialog';
+  dialog.setAttribute('aria-labelledby','delete-title');dialog.setAttribute('aria-describedby','delete-description');
+  const title=control('h2','Delete collection?');title.id='delete-title';
+  const description=control('p',`Remove “${collection.name}” and all ${collection.pieces.length} pieces from your draft? Move any pieces you want to keep to another collection first. The live website changes only after you preview and publish.`);description.id='delete-description';
+  const note=control('p','There is no restore button in the editor. Stored photos and publication backups are retained; this does not erase those files.');
+  const phrase=collection.name.trim() || 'DELETE';
+  const label=document.createElement('label');label.textContent=`Type ${phrase} to confirm`;
+  const input=document.createElement('input');input.type='text';input.autocomplete='off';input.spellcheck=false;input.setAttribute('autocapitalize','off');label.append(input);
+  const buttons=document.createElement('div');buttons.className='row';
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='Keep collection';cancel.onclick=()=>dialog.close();
+  const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete collection and pieces';remove.disabled=true;
+  input.oninput=()=>{remove.disabled=input.value!==phrase;};
+  remove.onclick=()=>{
+    if(busy || input.value!==phrase)return;
+    const index=draft.collections.findIndex(item=>item.id===collection.id);if(index<0)return;
+    draft.collections.splice(index,1);changed();dialog.close();render();
+    notify(`“${collection.name}” and its ${collection.pieces.length} pieces were removed from your draft. Save, preview, then publish to remove them from the website.`);
+    $('#add-collection').focus();
+  };
+  buttons.append(cancel,remove);dialog.append(title,description,note,label,buttons);document.body.append(dialog);
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});dialog.showModal();cancel.focus();
+}
 async function resolvePhoto(path) {if(!photos.has(path))photos.set(path,photoURL(path).catch(e=>{photos.delete(path);throw e;}));return photos.get(path);}
 function render() {
   const host=$('#collections-editor');host.replaceChildren();
@@ -31,6 +54,7 @@ function render() {
     const top=document.createElement('div');top.className='collection-top';top.append(control('h2',c.name));
     const ordering=document.createElement('div');ordering.className='row';
     for(const [text,delta] of [['↑ Move collection up',-1],['↓ Move collection down',1]]){const button=control('button',text,()=>reorder(draft.collections,ci,delta));button.disabled=ci+delta<0||ci+delta>=draft.collections.length;ordering.append(button);}
+    const deleteButton=control('button','Delete collection',()=>confirmCollectionDeletion(c));deleteButton.classList.add('delete-collection');ordering.append(deleteButton);
     top.append(ordering);section.append(top,field('Collection name',c.name,v=>{c.name=v;top.querySelector('h2').textContent=v;}),field('Collection description',c.description,v=>c.description=v,'textarea'),field('Hide this collection',c.hidden,v=>c.hidden=v,'checkbox'),field('Gallery layout',c.layout,v=>c.layout=v,'select',['original','even','large']));
     const pieces=document.createElement('div');pieces.className='pieces';
     c.pieces.forEach((p,pi)=>{

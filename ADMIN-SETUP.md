@@ -40,6 +40,8 @@ Inventory type records whether a piece is one-off or made-to-order for future co
 
 ## Security and data model
 
+To remove a collection from the editor, choose **Delete collection**, read the piece count, type its exact name, and choose **Delete collection and pieces**. Cancel or Escape keeps it. This removes the collection and its pieces from the draft, including Sold and Hidden pieces. Move pieces to another collection first if you want to keep them. Save, preview and publish to remove it publicly. There is no restore button; existing publication backups and photo files remain stored. This does not purge photos or future order records. Deleting the last collection is allowed. Normal revision/conflict protection still applies.
+
 - Public clients can read only `site_public` and photos referenced by its filtered snapshot. Drafts and hidden records never appear in that snapshot. Storage is **private**, not a public bucket. Published photos are fetched with the public project key and storage RLS. Previously viewed/downloaded images cannot be recalled from visitors' devices.
 - All writes go through authenticated database functions checking the private editor allowlist. RLS and grants deny direct draft/public writes, even for an editor. The publish function checks the current revision and required uploaded photos; it filters hidden items and writes an audit snapshot in the same transaction.
 - Upload paths are immutable UUIDs; users cannot overwrite/delete published photos. Unused drafts/uploads remain private. Periodically review storage usage and manually remove only photos absent from draft, publication and retained history.
