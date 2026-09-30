@@ -29,6 +29,7 @@ const server=http.createServer((req,res)=>{let name=decodeURIComponent(req.url.s
   const req=route.request(),url=new URL(req.url()),body=req.headers()['content-type']?.includes('application/json')?req.postDataJSON():null;let result;
   if(url.pathname==='/auth/v1/token')result={access_token:'test-session'};
   else if(url.pathname.endsWith('editor_check'))result=true;
+  else if(url.pathname.endsWith('editor_profile'))result={owner:false};
   else if(url.pathname==='/rest/v1/site_draft')result=[{content:draft,revision:rev}];
   else if(url.pathname==='/rest/v1/site_public')result=[{content:published}];
   else if(url.pathname.endsWith('save_draft')){if(conflict)return route.fulfill({status:409,json:{message:'Another editor saved a newer draft.'}});assert.equal(body.expected_revision,rev);draft=body.document;result=++rev;}

@@ -1,11 +1,12 @@
-import {configured, login, logout, request, uploadPhoto, photoURL} from '../lib/api.js';
+import {activityChanges} from './history.js';
+import {configured, login, logout, request, uploadPhoto, photoURL, acceptInvitation, setPassword} from '../lib/api.js';
 import {validate, statuses, textFields, move} from '../lib/content.js';
 const $ = selector => document.querySelector(selector);
 let draft, revision = 0, dirty = false, previewed = '', busy = false;
 const photos = new Map();
 const notify = message => {
   const notice=$('#notice');
-  if($('#editor').hidden)$('#signin').before(notice);else $('.toolbar').append(notice);
+  if(!$('#invitation').hidden)$('#invitation').prepend(notice);else if($('#editor').hidden)$('#signin').before(notice);else $('.toolbar').append(notice);
   notice.textContent = message;
 };
 function changed() {dirty=true;previewed='';$('#publish').disabled=true;$('#state').textContent='Unsaved changes';}
@@ -24,7 +25,7 @@ function field(label, value, update, type='text', choices=[]) {
 }
 async function run(action) {
   if(busy)return;busy=true;document.body.setAttribute('aria-busy','true');
-  const controls=[...document.querySelectorAll('#editor button,#editor input,#editor textarea,#editor select,#login button')]; const previous=controls.map(el=>el.disabled);controls.forEach(el=>el.disabled=true);
+  const controls=[...document.querySelectorAll('#editor button,#editor input,#editor textarea,#editor select,#login button,#invitation input,#invitation button')]; const previous=controls.map(el=>el.disabled);controls.forEach(el=>el.disabled=true);
   try{await action();}catch(error){notify(error.message);}finally{busy=false;document.body.removeAttribute('aria-busy');controls.forEach((el,i)=>el.disabled=previous[i]);$('#publish').disabled=!previewed||dirty;}
 }
 function reorder(items,index,delta){move(items,index,delta);changed();render();}
@@ -84,7 +85,7 @@ async function save() {
 $('#login').onsubmit=event=>{event.preventDefault();run(async()=>{
   const form=new FormData(event.target);await login(form.get('email'),form.get('password'));event.target.reset();
   if(!draft){const rows=await request('/rest/v1/site_draft?id=eq.1&select=content,revision');if(rows.length){draft=validate(rows[0].content);revision=rows[0].revision;}else{draft=validate(await fetch('../data/content.json').then(r=>r.json()));dirty=true;}}
-  $('#signin').hidden=true;$('#editor').hidden=false;render();notify('Signed in. Changes stay in your draft until you publish.');
+  $('#signin').hidden=true;$('#editor').hidden=false;render();await loadProfile();notify('Signed in. Changes stay in your draft until you publish.');
 });};
 $('#save').onclick=()=>run(save);
 $('#add-collection').onclick=()=>{draft.collections.push({id:crypto.randomUUID(),name:'New collection',description:'',hidden:true,layout:'original',pieces:[]});changed();render();};
@@ -105,8 +106,63 @@ $('#publish').onclick=()=>run(async()=>{
   if(dirty||previewed!==JSON.stringify(draft))throw Error('Preview your latest changes before publishing.');
   await request('/rest/v1/rpc/publish_draft',{method:'POST',body:{expected_revision:revision}});previewed='';notify('Published. Your website now shows this version.');$('#state').textContent=`Published · revision ${revision}`;
 });
-$('#signout').onclick=()=>run(async()=>{if(dirty&&!confirm('Sign out and discard unsaved changes?'))return;await logout();draft=null;dirty=false;previewed='';revision=0;for(const value of photos.values()){const url=await value.catch(()=>null);if(url?.startsWith('blob:'))URL.revokeObjectURL(url);}photos.clear();$('#editor').hidden=true;$('#signin').hidden=false;$('#collections-editor').replaceChildren();notify('Signed out.');});
+$('#signout').onclick=()=>run(async()=>{if(dirty&&!confirm('Sign out and discard unsaved changes?'))return;await logout();draft=null;dirty=false;previewed='';revision=0;clearManagement();for(const value of photos.values()){const url=await value.catch(()=>null);if(url?.startsWith('blob:'))URL.revokeObjectURL(url);}photos.clear();$('#editor').hidden=true;$('#signin').hidden=false;$('#collections-editor').replaceChildren();notify('Signed out.');});
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 // Short-lived in-memory sessions: reauthentication never discards an open draft.
 const reauth=control('button','Sign in again',()=>{$('#signin').hidden=false;$('#signin').scrollIntoView();});$('#editor .session-actions').append(reauth);
 if(!configured){notify('Setup is required before sign-in. Follow ADMIN-SETUP.md to connect your Supabase project.');$('#login button').disabled=true;}
+
+let historyCursor=null;
+function clearManagement(){
+ $('#users-panel').hidden=true;$('#users-list').replaceChildren();$('#history-list').replaceChildren();$('#invite-link').value='';$('#invite-link-label').hidden=true;$('#invite-result').textContent='';$('#invite-email').value='';historyCursor=null;$('#more-history').hidden=true;
+}
+async function loadProfile(){
+ clearManagement();
+ const profile=await request('/rest/v1/rpc/editor_profile',{method:'POST',body:{}});
+ $('#users-panel').hidden=!profile.owner;
+}
+async function loadUsers(){
+ const users=await request('/rest/v1/rpc/owner_users',{method:'POST',body:{}});const host=$('#users-list');host.replaceChildren();
+ for(const user of users){
+  const row=document.createElement('div');row.className='user-row';row.append(control('span',`${user.email} — ${user.owner?'Owner':user.accepted?'Editor':'Invited editor'}`));
+  if(!user.owner)row.append(control('button',`Remove access: ${user.email}`,async()=>{
+   if(!confirm(`Remove editor access for ${user.email}? Their saved work and account will be retained.`))return;
+   await request('/rest/v1/rpc/owner_remove_editor',{method:'POST',body:{target_user:user.id}});await loadUsers();notify('Editor access removed.');
+  }));host.append(row);
+ }
+}
+async function loadHistory(reset=true){
+ const events=await request('/rest/v1/rpc/editor_history',{method:'POST',body:{before_id:reset?null:historyCursor}});
+ const host=$('#history-list');if(reset)host.replaceChildren();
+ for(const event of events){
+  const article=document.createElement('article');article.className='activity';
+  article.append(control('h3',`${event.actor_email} — ${event.action}`));
+  article.append(control('p',`${new Date(event.occurred_at).toLocaleString()}${event.revision===null?'':` · revision ${event.revision}`}`));
+  const list=document.createElement('ul');for(const change of activityChanges(event))list.append(control('li',change));article.append(list);host.append(article);
+ }
+ if(!host.children.length)host.append(control('p','No activity recorded yet.'));
+ if(events.length)historyCursor=events.at(-1).id;$('#more-history').hidden=events.length<10;
+}
+$('#refresh-users').onclick=()=>run(loadUsers);
+$('#users-panel').addEventListener('toggle',()=>{if($('#users-panel').open&&!$('#users-panel').hidden)run(loadUsers);});
+$('#history-panel').addEventListener('toggle',()=>{if($('#history-panel').open)run(()=>loadHistory());});
+$('#refresh-history').onclick=()=>run(()=>loadHistory());$('#more-history').onclick=()=>run(()=>loadHistory(false));
+$('#invite-user').onsubmit=event=>{event.preventDefault();run(async()=>{
+ $('#invite-link').value='';$('#invite-link-label').hidden=true;
+ const result=await request('/functions/v1/invite-editor',{method:'POST',body:{email:$('#invite-email').value}});
+ $('#invite-result').textContent=result.message;
+ if(result.url){$('#invite-link').value=result.url;$('#invite-link-label').hidden=false;}
+ await loadUsers();notify('User access updated.');
+});};
+$('#set-password').onsubmit=event=>{event.preventDefault();run(async()=>{
+ const password=$('#new-password').value;if(password!==$('#confirm-password').value)throw Error('Passwords do not match.');
+ if(invitationToken){await acceptInvitation(invitationToken);invitationToken=null;}
+ await setPassword(password);event.target.reset();$('#invitation').hidden=true;$('#signin').hidden=false;notify('Password set. Sign in with your email and new password.');
+});};
+let invitationToken=null;
+const invitationParams=new URLSearchParams(location.hash.slice(1));
+if(invitationParams.has('token_hash')){
+ invitationToken=invitationParams.get('token_hash');history.replaceState(null,'',location.pathname+location.search);
+ $('#signin').hidden=true;
+ $('#invitation').hidden=false;notify('Choose a password to accept your invitation.');
+}
