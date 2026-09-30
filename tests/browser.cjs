@@ -11,8 +11,8 @@ const server=http.createServer((req,res)=>{let name=decodeURIComponent(req.url.s
  try{
  for(const width of [375,390,768,1440]){
   const context=await browser.newContext({viewport:{width,height:1000}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
-  await page.route('**/site-config.js',r=>r.fulfill({contentType:'text/javascript',body:"export const config={supabaseUrl:'',publishableKey:''};"}));
+  await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
+  await context.route('**/site-config.js',r=>r.fulfill({contentType:'text/javascript',body:"export const config={supabaseUrl:'',publishableKey:''};"}));
   await page.goto(base);await page.waitForSelector('.gallery figure');assert.equal(await page.locator('.gallery figure').count(),17);
   if(process.env.TEST_OUTPUT_DIR && [390,1440].includes(width)){fs.mkdirSync(process.env.TEST_OUTPUT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.TEST_OUTPUT_DIR,`public-${width}.png`)});}
   await page.locator('.gallery-link').first().click();assert.equal(await page.locator('#lightbox').evaluate(el=>el.open),true);await page.keyboard.press('Escape');
@@ -23,9 +23,9 @@ const server=http.createServer((req,res)=>{let name=decodeURIComponent(req.url.s
  }
  // Simulated service exercises the UI, not the production database security policies.
  const context=await browser.newContext({viewport:{width:390,height:844}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));let draft=structuredClone(seed),rev=0,published=structuredClone(seed),conflict=false;
- await page.route('**/site-config.js',route=>route.fulfill({contentType:'text/javascript',body:"export const config={supabaseUrl:'https://test.supabase.co',publishableKey:'sb_publishable_test'};"}));
- await page.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
- await page.route('https://test.supabase.co/**',async route=>{
+ await context.route('**/site-config.js',route=>route.fulfill({contentType:'text/javascript',body:"export const config={supabaseUrl:'https://test.supabase.co',publishableKey:'sb_publishable_test'};"}));
+ await context.route('https://www.googletagmanager.com/**',r=>r.fulfill({body:''}));
+ await context.route('https://test.supabase.co/**',async route=>{
   const req=route.request(),url=new URL(req.url()),body=req.headers()['content-type']?.includes('application/json')?req.postDataJSON():null;let result;
   if(url.pathname==='/auth/v1/token')result={access_token:'test-session'};
   else if(url.pathname.endsWith('editor_check'))result=true;
@@ -41,6 +41,23 @@ const server=http.createServer((req,res)=>{let name=decodeURIComponent(req.url.s
  });
  await page.goto(base+'/admin/');await page.getByLabel('Email',{exact:true}).fill('editor@example.test');await page.getByLabel('Password',{exact:true}).fill('test-password');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.waitForSelector('.piece');
  assert.equal(await page.locator('.piece').count(),17);
+ // Both, serial only, price only, neither, whitespace and zero survive save/reload.
+ const serial='MiXeD / <img src=x onerror=alert(1)> '+ 'x'.repeat(180);
+ const serialInput=page.getByLabel('Serial number (optional)',{exact:true});
+ const priceInput=page.getByLabel('Price (optional)',{exact:true});
+ assert.equal(await serialInput.first().inputValue(),'');assert.equal(await priceInput.first().inputValue(),'');
+ await serialInput.nth(0).fill(serial);await priceInput.nth(0).fill('125');
+ await serialInput.nth(2).fill('EF / 002');await priceInput.nth(3).fill('1234.50');
+ await serialInput.nth(4).fill('   ');await priceInput.nth(4).fill('   ');await priceInput.nth(5).fill('0');
+ await priceInput.nth(6).fill('-1');await page.getByRole('button',{name:'Save draft',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('#notice').textContent.startsWith('Enter a price'));assert.equal(rev,0);
+ await priceInput.nth(6).fill('');await page.getByRole('button',{name:'Save draft',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Draft saved'));
+ const expected=structuredClone(seed);
+ for(const [i,values] of [[0,{serialNumber:serial,price:'125'}],[2,{serialNumber:'EF / 002'}],[3,{price:'1234.50'}],[4,{serialNumber:'   ',price:'   '}],[5,{price:'0'}],[6,{price:''}]])Object.assign(expected.collections[0].pieces[i],values);
+ assert.deepEqual(draft,expected);assert.deepEqual(published,seed);
+ await page.reload();await page.getByLabel('Email',{exact:true}).fill('editor@example.test');await page.getByLabel('Password',{exact:true}).fill('test-password');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.waitForSelector('.piece');
+ assert.equal(await serialInput.first().inputValue(),serial);assert.equal(await priceInput.first().inputValue(),'125');assert.equal(await priceInput.nth(5).inputValue(),'0');
  await page.getByLabel('Status',{exact:true}).nth(0).selectOption('Sold');await page.getByLabel('Status',{exact:true}).nth(1).selectOption('Hidden');
  await page.getByLabel('Collection description').first().fill('Handcrafted for autumn.');
  assert.equal(await page.getByRole('button',{name:'Publish previewed draft'}).isDisabled(),true);
@@ -48,6 +65,22 @@ const server=http.createServer((req,res)=>{let name=decodeURIComponent(req.url.s
  assert.equal(published.collections[0].pieces[0].status,'Available');
  await page.getByRole('button',{name:'Preview',exact:true}).click();const frame=page.frameLocator('#preview-frame');await frame.locator('.sold-badge').waitFor();assert.equal(await frame.locator('.gallery figure').count(),16);
  await page.getByRole('button',{name:'Done reviewing'}).click();await page.getByRole('button',{name:'Publish previewed draft'}).click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.startsWith('Published.'));assert.equal(published.collections[0].pieces[0].status,'Sold');
+ const publicPage=await context.newPage();await publicPage.goto(base);await publicPage.waitForSelector('.piece-price');
+ const pieces=publicPage.locator('.gallery figure');
+ assert.equal(await pieces.nth(0).locator('.piece-serial').textContent(),serial);assert.equal(await pieces.nth(0).locator('.piece-price').textContent(),'$125.00');
+ assert.equal(await pieces.nth(0).locator('figcaption img').count(),0);
+ assert.equal(await pieces.nth(1).locator('.piece-serial').textContent(),'EF / 002');assert.equal(await pieces.nth(1).locator('.piece-price').count(),0);
+ assert.equal(await pieces.nth(2).locator('.piece-price').textContent(),'$1,234.50');assert.equal(await pieces.nth(2).locator('.piece-serial').count(),0);
+ assert.equal(await pieces.nth(3).locator('figcaption').evaluate(el=>el.children.length),2);
+ assert.equal(await pieces.nth(4).locator('.piece-price').textContent(),'$0.00');
+ assert.equal(await pieces.nth(5).locator('figcaption').evaluate(el=>el.children.length),2);
+ for(const width of [375,390,768,1440]){await publicPage.setViewportSize({width,height:900});assert.ok(await publicPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+ await publicPage.close();
+ await serialInput.first().fill('');await priceInput.first().fill('');
+ await page.getByRole('button',{name:'Preview',exact:true}).click();await frame.locator('.sold-badge').waitFor();
+ assert.equal(await frame.locator('.gallery figure').first().locator('figcaption').evaluate(el=>el.children.length),2);
+ await page.getByRole('button',{name:'Done reviewing'}).click();
+ assert.equal(draft.collections[0].pieces[0].serialNumber,'');assert.equal(draft.collections[0].pieces[0].price,'');
  await page.getByLabel('Piece name').first().fill('<img src=x onerror=alert(1)>');await page.getByRole('button',{name:'Preview',exact:true}).click();await frame.locator('figcaption span').first().waitFor();assert.equal(await frame.locator('figcaption span').first().textContent(),'<img src=x onerror=alert(1)>');await page.getByRole('button',{name:'Done reviewing'}).click();
  await page.getByLabel('Piece name').first().fill('Enchanted Mischief');assert.equal(await page.getByRole('button',{name:'Publish previewed draft'}).isDisabled(),true);
  await page.getByLabel('Replace photo').first().setInputFiles(path.join(root,'assets/logo.jpg'));await page.waitForFunction(()=>document.querySelector('#notice').textContent.startsWith('Photo uploaded.'));

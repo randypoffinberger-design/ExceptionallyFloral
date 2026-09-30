@@ -1,33 +1,7 @@
--- Run once in a NEW Supabase project's SQL editor, then run seed.sql.
+-- Existing projects: run before deploying the optional piece fields.
+-- Replaces functions only; preserves content, revisions, grants, history and photos.
 begin;
-create schema if not exists private;
-revoke all on schema private from public, anon, authenticated;
-create table private.editors (user_id uuid primary key references auth.users(id) on delete cascade);
-create function public.is_editor() returns boolean language sql stable security definer set search_path = '' as $$
-  select exists(select 1 from private.editors where user_id = (select auth.uid()));
-$$;
-revoke all on function public.is_editor() from public;
-grant execute on function public.is_editor() to anon, authenticated;
-create function public.editor_check() returns boolean language plpgsql security definer set search_path = '' as $$
-begin
-  if not public.is_editor() then raise exception 'This account is not an approved editor.' using errcode='42501'; end if;
-  return true;
-end $$;
-revoke all on function public.editor_check() from public;
-grant execute on function public.editor_check() to authenticated;
-
-create table public.site_draft(id integer primary key check(id=1),content jsonb not null, revision bigint not null default 0,updated_at timestamptz not null default now());
-create table public.site_public(id integer primary key check(id=1),content jsonb not null,revision bigint not null,published_at timestamptz not null default now());
-create table private.publish_history(id bigint generated always as identity primary key,content jsonb not null,revision bigint not null,actor uuid, published_at timestamptz not null default now());
-alter table public.site_draft enable row level security;
-alter table public.site_public enable row level security;
-revoke all on public.site_draft, public.site_public from anon, authenticated;
-grant select on public.site_draft to authenticated;
-grant select on public.site_public to anon, authenticated;
-create policy editor_read_draft on public.site_draft for select to authenticated using(public.is_editor());
-create policy published_read on public.site_public for select to anon,authenticated using(true);
-
-create function private.validate_content(document jsonb) returns void language plpgsql set search_path='' as $$
+create or replace function private.validate_content(document jsonb) returns void language plpgsql set search_path='' as $$
 declare c jsonb; p jsonb; k text; ids text[] := '{}'; identifier text;
 begin
   if document->>'schemaVersion' is distinct from '1' or jsonb_typeof(document->'collections') is distinct from 'array' or jsonb_typeof(document->'text') is distinct from 'object' or octet_length(document::text)>1000000 then raise exception 'Invalid content document'; end if;
@@ -57,21 +31,7 @@ begin
   end loop;
 end $$;
 
-create function public.save_draft(document jsonb, expected_revision bigint) returns bigint language plpgsql security definer set search_path='' as $$
-declare current_revision bigint;
-begin
-  perform public.editor_check();
-  perform private.validate_content(document);
-  select revision into current_revision from public.site_draft where id=1 for update;
-  if current_revision is null then raise exception 'Run seed.sql before editing.'; end if;
-  if current_revision is distinct from expected_revision then raise exception 'Another editor saved a newer draft. Copy your changes before reloading this page.' using errcode='40001'; end if;
-  update public.site_draft set content=document,revision=current_revision+1,updated_at=now() where id=1;
-  return current_revision+1;
-end $$;
-revoke all on function public.save_draft(jsonb,bigint) from public;
-grant execute on function public.save_draft(jsonb,bigint) to authenticated;
-
-create function public.publish_draft(expected_revision bigint) returns bigint language plpgsql security definer set search_path='' as $$
+create or replace function public.publish_draft(expected_revision bigint) returns bigint language plpgsql security definer set search_path='' as $$
 declare document jsonb; current_revision bigint; published jsonb; c jsonb; p jsonb; collections jsonb:='[]'; pieces jsonb;
 begin
   perform public.editor_check();
@@ -93,18 +53,4 @@ begin
   insert into public.site_public(id,content,revision) values(1,published,current_revision) on conflict(id) do update set content=excluded.content,revision=excluded.revision,published_at=now();
   return current_revision;
 end $$;
-revoke all on function public.publish_draft(bigint) from public;
-grant execute on function public.publish_draft(bigint) to authenticated;
-
-insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('site-photos','site-photos',false,5242880,array['image/jpeg']);
-create function public.is_published_photo(path text) returns boolean language sql stable security definer set search_path='' as $$
-  select exists(select 1 from public.site_public s, lateral jsonb_array_elements(s.content->'collections') c, lateral jsonb_array_elements(c->'pieces') p where p->>'image'=path);
-$$;
-revoke all on function public.is_published_photo(text) from public;
-grant execute on function public.is_published_photo(text) to anon,authenticated;
-create policy photo_read on storage.objects for select to anon,authenticated using(bucket_id='site-photos' and (public.is_editor() or public.is_published_photo(name)));
-create policy photo_upload on storage.objects for insert to authenticated with check(bucket_id='site-photos' and public.is_editor() and name ~ '^uploads/[a-f0-9-]+\.jpg$');
--- No update/delete policies: immutable image paths preserve published snapshots.
-revoke all on all tables in schema private from public,anon,authenticated;
-revoke all on all functions in schema private from public,anon,authenticated;
 commit;
