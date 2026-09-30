@@ -75,3 +75,9 @@ Use a server-side payment integration (for example a hosted checkout). Verify we
 ## Development
 
 No build is needed for GitHub Pages. Serve the repository root with a static HTTP server (ES modules require HTTP). `npm test` runs content/invariant checks using Node's built-in test runner. For browser tests install Playwright locally (`npm install --no-save playwright` and `npx playwright install chromium`), then run `npm run test:browser`. Set `BROWSER_CHANNEL=msedge` to use installed Edge. Set `TEST_OUTPUT_DIR` to save review screenshots. No test credentials are real.
+
+## Optional serial number and price update
+
+For an existing project, run `supabase/migrations/20260930_piece_details.sql` in the Supabase SQL editor **before deploying this version**. Do not rerun schema.sql or seed.sql. This migration replaces validation/publication functions without changing existing content, revisions, photos, permissions or publication history. New projects already include these functions in schema.sql.
+
+Each piece now has optional **Serial number** and **Price** inputs. Serial numbers are plain text with no required numbering pattern. Enter prices such as `125` or `125.00` (nonnegative, up to two decimal places); the site displays US currency such as **$125.00**. Zero displays **$0.00**. Leave either input blank to omit that detail entirely. Save, preview and publish as usual. This is a display price and does not enable checkout.

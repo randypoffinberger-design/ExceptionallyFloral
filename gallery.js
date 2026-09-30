@@ -1,5 +1,5 @@
 import {configured, request, photoURL} from './lib/api.js';
-import {publicContent, textFields} from './lib/content.js';
+import {publicContent, textFields, formatPrice} from './lib/content.js';
 let generation = 0;
 let objectURLs = [];
 export async function renderContent(content, previewPhotos = {}) {
@@ -22,6 +22,10 @@ export async function renderContent(content, previewPhotos = {}) {
       if (p.status === 'Sold') { const badge = document.createElement('span'); badge.className = 'sold-badge'; badge.textContent = 'SOLD'; link.append(badge); }
       const caption = document.createElement('figcaption'), title = document.createElement('span'), sub = document.createElement('small');
       title.textContent = p.name; sub.textContent = c.name + (p.status === 'Made to Order' ? ' · Made to Order' : ''); caption.append(title,sub); figure.append(link,caption); gallery.append(figure);
+      for (const [className, value] of [['piece-serial',p.serialNumber?.trim() ? p.serialNumber : ''],['piece-price',formatPrice(p.price)]]) {
+        if (!value) continue;
+        const detail = document.createElement('small'); detail.className = className; detail.textContent = value; caption.append(detail);
+      }
       (previewPhotos[p.id] ? Promise.resolve(previewPhotos[p.id]) : photoURL(p.image)).then(url => {
         if (generation !== current) { if (url.startsWith('blob:')) URL.revokeObjectURL(url); return; }
         if (url.startsWith('blob:') && !previewPhotos[p.id]) objectURLs.push(url); img.src = url; link.href = url;

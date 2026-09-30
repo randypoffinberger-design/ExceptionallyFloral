@@ -17,7 +17,8 @@ function field(label, value, update, type='text', choices=[]) {
   if(type==='select')for(const option of choices){const el=document.createElement('option');el.value=option;el.textContent=option;input.append(el);}
   else if(type!=='textarea')input.type=type;
   if(type==='checkbox')input.checked=value;else input.value=value;
-  if(type==='text')input.maxLength=label==='Photo description'?500:120;
+  if(type==='text' && !['Serial number (optional)','Price (optional)'].includes(label))input.maxLength=label==='Photo description'?500:120;
+  if(label==='Price (optional)'){input.inputMode='decimal';input.placeholder='125.00';}
   if(type==='textarea')input.maxLength=3000;
   input.addEventListener('input',()=>{update(type==='checkbox'?input.checked:input.value);changed();});wrapper.append(input);return wrapper;
 }
@@ -65,7 +66,7 @@ function render() {
       const card=document.createElement('article');card.className='piece';const img=document.createElement('img');img.alt=p.alt||p.name;resolvePhoto(p.image).then(url=>img.src=url).catch(()=>img.alt='Photo unavailable');card.append(img);
       const row=document.createElement('div');row.className='row';
       for(const [text,delta] of [['↑ Earlier',-1],['↓ Later',1]]){const b=control('button',text,()=>reorder(c.pieces,pi,delta));b.setAttribute('aria-label',`${text}: ${p.name}`);b.disabled=pi+delta<0||pi+delta>=c.pieces.length;row.append(b);}
-      card.append(row,field('Piece name',p.name,v=>p.name=v),field('Status',p.status,v=>p.status=v,'select',statuses),field('Inventory type',p.inventoryType,v=>p.inventoryType=v,'select',['one-off','made-to-order']),field('Photo description',p.alt,v=>p.alt=v));
+      card.append(row,field('Piece name',p.name,v=>p.name=v),field('Serial number (optional)',p.serialNumber??'',v=>p.serialNumber=v),field('Price (optional)',p.price??'',v=>p.price=v),field('Status',p.status,v=>p.status=v,'select',statuses),field('Inventory type',p.inventoryType,v=>p.inventoryType=v,'select',['one-off','made-to-order']),field('Photo description',p.alt,v=>p.alt=v));
       const upload=document.createElement('label');upload.textContent='Replace photo';const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';input.onchange=()=>run(async()=>{if(!input.files[0])return;notify('Uploading photo…');p.image=await uploadPhoto(input.files[0]);changed();render();notify('Photo uploaded. Save and preview when ready.');});upload.append(input);card.append(upload);
       const collectionSelect=field('Move to collection',c.id,v=>{const target=draft.collections.find(item=>item.id===v);if(target&&target!==c){c.pieces.splice(pi,1);target.pieces.push(p);queueMicrotask(render);}},'select',draft.collections.map(item=>item.id));
       [...collectionSelect.querySelectorAll('option')].forEach((o,i)=>o.textContent=draft.collections[i].name);card.append(collectionSelect);pieces.append(card);
