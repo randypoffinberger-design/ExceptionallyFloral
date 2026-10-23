@@ -50,5 +50,5 @@ if (preview) {
     const doc = configured ? (await request('/rest/v1/site_public?id=eq.1&select=content'))[0]?.content : await fetch('data/content.json').then(r => {if(!r.ok)throw Error();return r.json();});
     if (!doc) throw Error('No published content');
     await renderContent(doc);
-  })().catch(() => {document.querySelector('#collections').textContent='Our collections are temporarily unavailable. Please contact us on Facebook for current availability.';});
+  })().catch(() => {document.querySelector('#collections').textContent='Our collections are temporarily unavailable. Please email exceptionallyfloral@gmail.com for current availability.';});
 }
