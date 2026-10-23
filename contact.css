@@ -1,0 +1,17 @@
+.contact-form-shell{max-width:780px;margin:48px auto;padding:40px;background:rgba(20,9,13,.94);border:1px solid #b99963;color:#f8f0e5}
+.contact-form-shell h1{font-size:clamp(36px,5vw,54px);letter-spacing:-1px;margin:0 0 24px}
+.contact-form-shell p{font-size:15px;line-height:1.75}
+.contact-form-shell em,.contact-form-shell .eyebrow{color:#e3bd7d}
+.setup-note{padding:20px;margin-bottom:36px;background:#f8f0e5;color:#402331;border-left:4px solid #b99963}
+.setup-note p{margin:8px 0 0;font-size:14px}
+.contact-form{display:grid;gap:10px;margin-top:28px}
+.contact-form label{font-size:15px;margin-top:12px}
+.contact-form label span{font-size:12px;color:#d1c3b7}
+.contact-form input,.contact-form textarea{box-sizing:border-box;width:100%;min-width:0;border:1px solid #b99963;border-radius:4px;padding:13px;background:#fffaf3;color:#261c20;font:16px/1.5 Arial,sans-serif}
+.contact-form textarea{resize:vertical;min-height:160px}
+.contact-form input:focus-visible,.contact-form textarea:focus-visible{outline:3px solid #e3bd7d;outline-offset:3px}
+.contact-form .form-privacy{font-size:12px;color:#ddd0c2;margin:10px 0}
+.contact-form .button{justify-self:start;margin-top:6px;min-height:48px;border:1px solid #b99963;cursor:pointer}
+.contact-alternative{margin:26px 0 0;overflow-wrap:anywhere}
+.contact-alternative a{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:700px){.contact-form-shell{margin:24px 4%;padding:25px 20px}.contact-form-shell h1{font-size:38px}.setup-note{padding:16px}.header>a:last-child{font-size:12px}}

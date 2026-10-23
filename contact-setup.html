@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Contact form setup | Exceptionally Floral</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=20260924-editor">
+  <link rel="stylesheet" href="contact.css?v=20261022">
+</head>
+<body>
+  <header class="header"><a class="wordmark" href="./">Exceptionally <span>Floral</span></a><a href="./#contact">Back to the website</a></header>
+  <main class="contact-form-shell">
+    <aside class="setup-note"><strong>Owner setup preview</strong><p>This form is not yet linked from the main website. Submit a short test message below, then open the activation email from FormSubmit in exceptionallyfloral@gmail.com and confirm the address. Check Spam if needed. After activation, send a second test and confirm it arrives before we replace the main contact buttons.</p></aside>
+    <section aria-labelledby="contact-title">
+      <p class="eyebrow">LET’S MAKE IT PERSONAL</p>
+      <h1 id="contact-title">Tell us what<br>you have <em>in mind.</em></h1>
+      <p>Share your idea, colors, occasion, and any timing or budget details. We’ll reply to the email address you provide.</p>
+      <form class="contact-form" action="https://formsubmit.co/exceptionallyfloral@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="Exceptionally Floral — Website inquiry">
+        <input type="hidden" name="_template" value="table">
+        <label for="contact-name">Your name <span>(required)</span></label>
+        <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="100" required>
+        <label for="contact-email">Your email <span>(required)</span></label>
+        <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+        <label for="contact-message">Your message <span>(required)</span></label>
+        <textarea id="contact-message" name="message" rows="7" minlength="10" maxlength="5000" required placeholder="Tell us about the piece you’re imagining…"></textarea>
+        <p class="form-privacy">Your name, email, and message are processed by FormSubmit and forwarded to Exceptionally Floral to respond to your inquiry. A spam-verification step may appear after you send.</p>
+        <button class="button cream" type="submit">Send message <span aria-hidden="true">↗</span></button>
+      </form>
+      <p class="contact-alternative">Prefer to email directly? <a href="mailto:exceptionallyfloral@gmail.com">exceptionallyfloral@gmail.com</a></p>
+    </section>
+  </main>
+</body>
+</html>
