@@ -15,3 +15,5 @@
 .contact-alternative{margin:26px 0 0;overflow-wrap:anywhere}
 .contact-alternative a{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:700px){.contact-form-shell{margin:24px 4%;padding:25px 20px}.contact-form-shell h1{font-size:38px}.setup-note{padding:16px}.header>a:last-child{font-size:12px}}
+
+#contact .contact-form{max-width:100%}#contact .contact-form label{color:#f8f0e5}#contact .contact-form .form-privacy{max-width:none}#contact .contact-alternative{font-size:12px}#contact .contact-alternative a{text-decoration:underline;overflow-wrap:anywhere}
